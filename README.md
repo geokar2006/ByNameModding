@@ -54,19 +54,19 @@ class Field {
 void *set_fov(float value) {
     int (*Screen$$get_height)();
     int (*Screen$$get_width)();
-    InitResolveFunc(Screen$$get_height, OBFUSCATE("UnityEngine.Screen::get_height()")); // #define InitResolveFunc(x, y)
-    InitResolveFunc(Screen$$get_width, OBFUSCATE("UnityEngine.Screen::get_width()"));// Don't forgot about OBFUSCATE
+    InitResolveFunc(Screen$$get_height, "UnityEngine.Screen::get_height()"); // #define InitResolveFunc(x, y)
+    InitResolveFunc(Screen$$get_width, "UnityEngine.Screen::get_width()");
     if (Screen$$get_height && Screen$$get_width) {
-        LOGI(OBFUSCATE("%dx%d"), Screen$$get_height(), Screen$$get_width());
+        LOGI("%dx%d", Screen$$get_height(), Screen$$get_width());
     }
 
     uintptr_t (*Camera$$get_main)(); // you can use void *
     float (*Camera$$get_fieldofview)(uintptr_t);
     void (*Camera$$set_fieldofview)(uintptr_t, float);
 
-    InitResolveFunc(Camera$$get_main, OBFUSCATE("UnityEngine.Camera::get_main()"));
-    InitResolveFunc(Camera$$set_fieldofview, OBFUSCATE("UnityEngine.Camera::set_fieldOfView(System.Single)"));
-    InitResolveFunc(Camera$$get_fieldofview, OBFUSCATE("UnityEngine.Camera::get_fieldOfView()"));
+    InitResolveFunc(Camera$$get_main, "UnityEngine.Camera::get_main()");
+    InitResolveFunc(Camera$$set_fieldofview, "UnityEngine.Camera::set_fieldOfView(System.Single)");
+    InitResolveFunc(Camera$$get_fieldofview, "UnityEngine.Camera::get_fieldOfView()");
 
     if (Camera$$get_main && Camera$$get_fieldofview && Camera$$set_fieldofview) {
         uintptr_t mainCamera = Camera$$get_main();
@@ -74,10 +74,10 @@ void *set_fov(float value) {
             float oldFOV = Camera$$get_fieldofview(mainCamera);
             Camera$$set_fieldofview(mainCamera, value);
             float newFOV = Camera$$get_fieldofview(mainCamera);
-            LOGI(OBFUSCATE("Camera Ptr: %p  |  oldFOV: %.2f  |  newFOV: %.2f"), (void *) mainCamera, oldFOV,
+            LOGI("Camera Ptr: %p  |  oldFOV: %.2f  |  newFOV: %.2f", (void *) mainCamera, oldFOV,
                  newFOV);
         } else {
-            LOGE(OBFUSCATE("mainCamera is currently not available!"));
+            LOGE("mainCamera is currently not available!");
         }
     }
 }
@@ -103,13 +103,13 @@ void *hack_thread(void *) {
     do {
         sleep(1);
     } while (!isLibraryLoaded(libName));
-    auto Transform = new LoadClass(OBFUSCATE("UnityEngine"), OBFUSCATE("Transform"));
-    auto Component = new LoadClass(OBFUSCATE("UnityEngine"), OBFUSCATE("Component"));
-    auto FPSControler = new LoadClass(OBFUSCATE_KEY("", 'i'), OBFUSCATE_KEY("FPSControler", 'c'));
+    auto Transform = new LoadClass("UnityEngine", "Transform");
+    auto Component = new LoadClass("UnityEngine", "Component");
+    auto FPSControler = new LoadClass("", "FPSControler");
             
-    auto Offset_Update = FPSControler->GetMethodOffsetByName(OBFUSCATE_KEY("Update", '|'), 0)
-    auto Offset_get_transform = Component->GetMethodOffsetByName(OBFUSCATE("get_transform", 0);// 0 - parametrs count in original c# method
-    auto Offset_set_position_Injected = Transform->GetMethodOffsetByName(OBFUSCATE("set_position_Injected"), 1);// set_position working badly
+    auto Offset_Update = FPSControler->GetMethodOffsetByName("Update", 0)
+    auto Offset_get_transform = Component->GetMethodOffsetByName("get_transform", 0);// 0 - parametrs count in original c# method
+    auto Offset_set_position_Injected = Transform->GetMethodOffsetByName("set_position_Injected", 1);// set_position working badly
     
     InitFunc(get_Transform, Offset_get_transform);
     InitFunc(set_position,  Offset_set_position_Injected);
