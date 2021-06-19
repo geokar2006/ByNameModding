@@ -1,32 +1,46 @@
 # ByNameModding
 Modding (hacking) il2cpp games by classes, methods, fields names.
-# Status: Ready to use
-# Why did I do it
-## 1. In order not to update the offset of the unity methods
-## 2. For fun.
-# Bugs:
-### Everything is fixed. but it is not exactly :)
+
+# Information
+Status: **Ready to use** <br/>
+Bugs: **Everything is fixed. but it is not exactly :)** <br/>
+
 # File structure:
-  + ## Class LoadClass
-     + ### Methods:
-       + LoadClass(const char *namespce, const char *clazz, const char *dllname - optional)
-       + LoadClass(Il2CppClass *clazz)
-       + GetFieldInfoByName(const char *name)
-       + GetFieldByName(const char *name)
-       + GetFieldOffset(const char *name or Fieldinfo *filed)
-       + GetMethodInfoByName(const char *name, int paramcount)
-       + GetMethodOffsetByName(const char *name, int paramcoun)
-   + ## Class Field
-     + ### Methods:
-       + Field(FieldInfo *thiz, void *_instance - optional for static)
-       + get_offset()
-       + get()
-       + set(T val)
-     + ### Fields:
-       + init
-       + thread_static
-       + clazz
-  + ## void * get_Method(const char *str) 
+```cpp
+class LoadClass {
+
+  LoadClass(const char *namespce, const char *clazz, const char *dllname [optional]);
+   
+  LoadClass(Il2CppClass *clazz);
+   
+  GetFieldInfoByName(const char *name);
+   
+  GetFieldByName(const char *name);
+   
+  GetFieldOffset(const char *name or Fieldinfo *filed);
+   
+  GetMethodInfoByName(const char *name, int paramcount);
+  
+  GetMethodOffsetByName(const char *name, int paramcoun);
+   
+}
+class Field {
+  bool init;
+  bool thread_static;
+  bool is_instance;
+  void *instance;
+  
+  Field(FieldInfo *thiz, void *_instance [optional for static]);
+  
+  get_offset();
+  
+  get();
+  
+  set(T val);
+  
+  void *get_Method(const char *str);
+}
+```
 # Usage
 ## get_method example
 ```c++
@@ -73,7 +87,7 @@ void *set_fov(float value) {
 void *(*get_Transform)(void *instance);
 void (*set_position)(void *Transform, Vector3);
 void *myPlayer;
-void (*old_Update)(void *instance);
+void (*old_Update)(void *);
 void Update(void *instance){
     old_Update(instance);
     if (instance){
@@ -84,15 +98,22 @@ void Update(void *instance){
         set_position(myPlayer_Transform, Vector3(0, 0, 0);
     }
 }
+
 void *hack_thread(void *) {
     do {
         sleep(1);
     } while (!isLibraryLoaded(libName));
-    auto *Transform = new LoadClass(OBFUSCATE("UnityEngine"), OBFUSCATE("Transform"));
-    auto *Component = new LoadClass(OBFUSCATE("UnityEngine"), OBFUSCATE("Component"));
-    InitFunc(get_Transform, Component->GetMethodOffsetByName(OBFUSCATE("get_transform"), 0); // 0 - parametrs count in original c# method
-    InitFunc(set_position, Transform->GetMethodOffsetByName(OBFUSCATE("set_position_Injected"), 1); // set_position working badly
-    MSHookFunction((void *)LoadClass(OBFUSCATE_KEY("", 'i'), OBFUSCATE_KEY("FPSControler", 'c')).GetMethodOffsetByName(
-            OBFUSCATE_KEY("Update", '|'), 0), (void *) Update, (void **) &old_Update);
+    auto Transform = new LoadClass(OBFUSCATE("UnityEngine"), OBFUSCATE("Transform"));
+    auto Component = new LoadClass(OBFUSCATE("UnityEngine"), OBFUSCATE("Component"));
+    auto FPSControler = new LoadClass(OBFUSCATE_KEY("", 'i'), OBFUSCATE_KEY("FPSControler", 'c'));
+            
+    auto Offset_Update = FPSControler->GetMethodOffsetByName(OBFUSCATE_KEY("Update", '|'), 0)
+    auto Offset_get_transform = Component->GetMethodOffsetByName(OBFUSCATE("get_transform", 0);// 0 - parametrs count in original c# method
+    auto Offset_set_position_Injected = Transform->GetMethodOffsetByName(OBFUSCATE("set_position_Injected"), 1);// set_position working badly
+    
+    InitFunc(get_Transform, Offset_get_transform);
+    InitFunc(set_position,  Offset_set_position_Injected);
+    
+    MSHookFunction((void *)Offset_Update, (void *) Update, (void **) &old_Update);
 }
 ```
